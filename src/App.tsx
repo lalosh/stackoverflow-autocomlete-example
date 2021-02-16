@@ -1,24 +1,55 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { debounce } from 'lodash';
+
+let debouncedFunction: any;
+
 
 function App() {
+
+  const [inputValue, setInputValue] = useState('');
+
+  const onSearchChange = (event: any) => {
+    try {
+
+      setInputValue(event.target.value);
+
+      /**
+       * cancel old saved debounced functions
+       */
+      if (debouncedFunction && debouncedFunction.cancel)
+        debouncedFunction.cancel();
+
+      debouncedFunction = debounce(async () => {
+
+        // use event value if you want in request
+        const response: any = await axios.get(
+          'https://jsonplaceholder.typicode.com/todos/1' + `?test=${event.target.value}`
+        );
+
+        if (response.data) {
+          console.log('autocomplete results...')
+        }
+
+
+      }, 2000);
+      debouncedFunction();
+
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div >
+
+      <input
+        value={inputValue}
+        onChange={onSearchChange}
+        placeholder="Search with autocomplete..."
+      />
+
     </div>
   );
 }
